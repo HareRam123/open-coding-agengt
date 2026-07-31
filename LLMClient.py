@@ -1,6 +1,6 @@
 
-
 import asyncio
+import inspect
 import os
 from typing import Any, AsyncGenerator
 
@@ -60,10 +60,6 @@ class LLMClient:
                         )
                         return  # Exit after yielding the error event
                     
-
-            
-
-
 
     async def _non_stream_response(self, 
                                    client: AsyncOpenAI, 
@@ -133,7 +129,7 @@ class LLMClient:
         )
 
 
-    async def close(self):
-        if self._client is not None:
+    async def close(self) -> None:
+        if self._client:
             await self._client.close()
             self._client = None
