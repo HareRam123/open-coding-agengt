@@ -5,7 +5,7 @@ import os
 from typing import Any, AsyncGenerator
 
 from openai import APIConnectionError, APIError, AsyncOpenAI, RateLimitError
-from response import EventType, StreamEvent, TextDelta, TokenUsage
+from response import StreamEventType, StreamEvent, TextDelta, TokenUsage
 
 
 from dotenv import load_dotenv
@@ -55,7 +55,7 @@ class LLMClient:
                         await asyncio.sleep(2 ** attempt)  # Exponential backoff
                     else:
                         yield StreamEvent(
-                            type=EventType.ERROR,
+                            type=StreamEventType.ERROR,
                             error=str(e),
                         )
                         return  # Exit after yielding the error event
@@ -87,7 +87,7 @@ class LLMClient:
             )
 
         return StreamEvent(
-            type=EventType.MESSAGE_COMPLETE,
+            type=StreamEventType.MESSAGE_COMPLETE,
             text_delta=text_delta,
             finish_reason=choice.finish_reason,
             usage=usage,
@@ -122,12 +122,12 @@ class LLMClient:
             if choice.delta and choice.delta.content:
                 text_delta = TextDelta(content=choice.delta.content)
                 yield StreamEvent(
-                    type=EventType.TEXT_DELTA,
+                    type=StreamEventType.TEXT_DELTA,
                     text_delta=text_delta,
                 )
             
         yield StreamEvent(
-            type=EventType.MESSAGE_COMPLETE,
+            type=StreamEventType.MESSAGE_COMPLETE,
             finish_reason=finish_reason,
             usage=usage,
         )
@@ -135,5 +135,5 @@ class LLMClient:
 
     async def close(self):
         if self._client is not None:
-            await self._client.aclose()
+            await self._client.close()
             self._client = None
