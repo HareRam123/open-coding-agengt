@@ -14,18 +14,18 @@ class Agent:
     def __init__(self, api_key: str, base_url: str):
         self.client = LLMClient(api_key=api_key, base_url=base_url)
 
-    async def run(self, messages: list[dict[str, str]]):
+    async def run(self, prompt: str):
         final_response: str | None = None
         yield AgentEvent.agent_start(message="Agent started")
-        async for event in self._agentic_loop():
+        async for event in self._agentic_loop(prompt):
             yield event
             if event.type == AgentEventType.TEXT_COMPLETE:
                 final_response = event.data.get("content")
 
         yield AgentEvent.agent_end(response=final_response, usage=None)
 
-    async def _agentic_loop(self) -> AsyncGenerator[AgentEvent, None]:
-        messages = [{"role": "user", "content": "Hello! Tell me a joke."}]
+    async def _agentic_loop(self, prompt: str) -> AsyncGenerator[AgentEvent, None]:
+        messages = [{"role": "user", "content": prompt}]
         response_text = ""
         async for event in self.client.chat_completion(messages=messages, stream=True):
             if event.type == StreamEventType.TEXT_DELTA:
