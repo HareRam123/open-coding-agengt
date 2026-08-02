@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 from os import name
+from tools.registry import create_default_registry
 from typing import AsyncGenerator
 
 from LLMClient import LLMClient
@@ -14,8 +15,8 @@ from context.manager import ContextManager
 class Agent:
     def __init__(self, api_key: str, base_url: str):
         self.client = LLMClient(api_key=api_key, base_url=base_url)
-       
         self.context_manager = ContextManager()  # Initialize context manager if needed
+        self.tool_registry = create_default_registry()  
 
     async def run(self, prompt: str):
         final_response: str | None = None
@@ -31,14 +32,25 @@ class Agent:
     async def _agentic_loop(self, prompt: str) -> AsyncGenerator[AgentEvent, None]:
         
         response_text = ""
+        tool_schemas = self.tool_registry.get_schemas()
         messages = self.context_manager.get_messages()
-        async for event in self.client.chat_completion(messages=messages, stream=True):
+
+        import json
+        #print(json.dumps(messages, indent=2))
+        #print(json.dumps(tool_schemas, indent=2))
+
+        
+        async for event in self.client.chat_completion(messages=messages, 
+                                                       tools=tool_schemas if tool_schemas else None,
+                                                       stream=True):
             if event.type == StreamEventType.TEXT_DELTA:
                 content = event.text_delta.content if event.text_delta else ""
                 response_text += content
                 yield AgentEvent.text_delta(content=content)
             elif event.type == StreamEventType.ERROR:
                 yield AgentEvent.agent_error(error=event.error or "Unknown error")
+
+            print(event)
 
         self.context_manager.add_assistant_message(content=response_text or None)
         if response_text:

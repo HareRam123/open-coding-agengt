@@ -24,6 +24,25 @@ class ToolResult:
     error: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    @classmethod
+    def error_result(cls, error: str, output: str = "", **kwargs: Any):
+        return cls(
+            success=False,
+            output=output,
+            error=error,
+            **kwargs,
+        )
+
+    @classmethod
+    def success_result(cls, output: str, **kwargs: Any):
+        return cls(
+            success=True,
+            output=output,
+            error=None,
+            **kwargs,
+        )
+
+
     
 @dataclass
 class ToolInvocation:
@@ -90,7 +109,7 @@ class Tool(abc.ABC):
     async def get_confirmation(
         self, invocation: ToolInvocation
     ) -> ToolConfirmation | None:
-        if not self.is_mutating(invocation.params):
+        if not self.is_mutating():
             return None
 
         return ToolConfirmation(
@@ -98,15 +117,6 @@ class Tool(abc.ABC):
             params=invocation.params,
             description=f"Execute {self.name}",
         )
-
-    def to_openai_schema(self) -> dict[str, Any]:
-        schema = self.schema
-        if isinstance(schema, type) and issubclass(schema, BaseModel):
-            json_schema =  model_json_schema(schema, mode="serialization")  # Use Pydantic's built-in method to get the JSON schema
-        elif isinstance(schema, dict):
-            return schema
-        else:
-            raise TypeError("Schema must be a Pydantic model or a dictionary.")
 
     def to_openai_schema(self) -> dict[str, Any]:
         schema = self.schema
