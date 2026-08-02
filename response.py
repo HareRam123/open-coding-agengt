@@ -39,6 +39,20 @@ class TokenUsage:
 
 
 @dataclass
+class ToolResultMessage:
+    tool_call_id: str
+    content: str
+    is_error: bool = False
+
+    def to_openai_message(self) -> dict[str, Any]:
+        return {
+            "role": "tool",
+            "tool_call_id": self.tool_call_id,
+            "content": self.content,
+        }
+
+
+@dataclass
 class ToolCallDelta:
     call_id: str
     name: str | None = None

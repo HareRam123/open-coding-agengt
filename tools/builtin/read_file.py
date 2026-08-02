@@ -125,9 +125,9 @@ class ReadFileTool(Tool):
 
             return ToolResult.success_result(
                 output=output,
-                truncated=truncated,
                 metadata={
                     "path": str(path),
+                    "truncated": truncated,
                     "total_lines": total_lines,
                     "shown_start": start_idx + 1,
                     "shown_end": end_idx,
