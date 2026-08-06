@@ -33,6 +33,17 @@ class CLI:
             self.agent = agent
             return await self._process_message(messages)
 
+    def _get_tool_kind(self, tool_name: str) -> str | None:
+        tool_kind = None
+        tool = self.agent.tool_registry.get(tool_name)
+        if not tool:
+            tool_kind = None
+
+        tool_kind = tool.kind.value
+
+        return tool_kind
+
+
     async def _process_message(self, messages: str) -> str |  None:
         if not self.agent:
             raise RuntimeError("Agent is not initialized. Call run_single first.")
@@ -42,7 +53,7 @@ class CLI:
         
         
         async for event in self.agent.run(messages):
-            print("main event", event)
+            #print("main event", event)
             if event.type == AgentEventType.TEXT_DELTA:
                 content = event.data.get("content", "")
                 if not assistant_streaming:
@@ -55,9 +66,35 @@ class CLI:
                 if assistant_streaming:
                     self.tui.end_assistant()
                     assistant_streaming = False
+                    
             elif event.type == AgentEventType.AGENT_ERROR:
                 error = event.data.get("error", "Unknown error")
                 console.print(f"\n[error]Error: {error}[/error]")
+                
+            elif event.type == AgentEventType.TOOL_CALL_START:
+                tool_name = event.data.get("name", "unknown")
+                tool_kind = self._get_tool_kind(tool_name)
+                self.tui.tool_call_start(
+                    event.data.get("call_id", ""),
+                    tool_name,
+                    tool_kind,
+                    event.data.get("arguments", {}),
+                )
+            elif event.type == AgentEventType.TOOL_CALL_COMPLETE:
+                tool_name = event.data.get("name", "unknown")
+                tool_kind = self._get_tool_kind(tool_name)
+                self.tui.tool_call_complete(
+                    event.data.get("call_id", ""),
+                    tool_name,
+                    tool_kind,
+                    event.data.get("success", False),
+                    event.data.get("output", ""),
+                    event.data.get("error"),
+                    event.data.get("metadata"),
+                    event.data.get("diff"),
+                    event.data.get("truncated", False),
+                    event.data.get("exit_code"),
+                )
 
         return final_response
 
@@ -68,7 +105,8 @@ async def run(messages: list[dict[str, Any]]) -> None:
         messages=messages,
         stream=True
     ):
-        print(event)
+        pass
+
 
 @click.command()
 @click.argument("prompt", required=False)

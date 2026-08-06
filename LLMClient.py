@@ -7,7 +7,6 @@ from typing import Any, AsyncGenerator
 from openai import APIConnectionError, APIError, AsyncOpenAI, RateLimitError
 from response import StreamEventType, StreamEvent, TextDelta, TokenUsage, ToolCallDelta, ToolCall, parse_tool_call_arguments
 
-
 from dotenv import load_dotenv
 import openai
 

@@ -18,6 +18,7 @@ class Agent:
         self.client = LLMClient(api_key=api_key, base_url=base_url)
         self.context_manager = ContextManager()  # Initialize context manager if needed
         self.tool_registry = create_default_registry()  
+        
 
     async def run(self, prompt: str):
         final_response: str | None = None
