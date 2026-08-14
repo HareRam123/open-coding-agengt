@@ -10,15 +10,24 @@ from response import StreamEventType, StreamEvent, TextDelta, TokenUsage, ToolCa
 from dotenv import load_dotenv
 import openai
 
+from config.config import Config
+
 
 load_dotenv()
 
 
 class LLMClient:
-    def __init__(self, api_key, base_url):
+    def __init__(
+        self,
+        config: Config | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
+    ):
         self._client: AsyncOpenAI | None = None
-        self.api_key = api_key
-        self.base_url = base_url
+        self.config = config
+        self.api_key = config.api_key if config else api_key
+        self.base_url = config.base_url if config else base_url
+        self.model_name = config.model_name if config else "openai/gpt-4o-mini"
         self.max_retries = 3
 
     async def get_client(self):
@@ -54,7 +63,7 @@ class LLMClient:
                               ) -> AsyncGenerator[StreamEvent, None] | None:
             client = await self.get_client()
             kwargs = {
-                "model": "openai/gpt-4o-mini",
+                "model": self.model_name,
                 "messages": messages,
                 "stream": stream,
             }

@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 class ModelConfig(BaseModel):
-    name: str = "mistralai/devstral-2512:free"
+    name: str = "openai/gpt-4o-mini"
     temperature: float = Field(default=1, ge=0.0, le=2.0)
     context_window: int = 256_000
 

@@ -34,10 +34,7 @@ class CLI:
         )
 
     async def run_single(self, messages: str) -> str | None:
-        async with Agent(
-            api_key=self.config.api_key or "",
-            base_url=self.config.base_url or BASE_URL,
-        ) as agent:
+        async with Agent(self.config) as agent:
             self.agent = agent
             return await self._process_message(messages)
 
@@ -51,10 +48,7 @@ class CLI:
             ],
         )
 
-        async with Agent(
-            api_key=self.config.api_key or "",
-            base_url=self.config.base_url or BASE_URL,
-        ) as agent:
+        async with Agent(self.config) as agent:
             self.agent = agent
 
             while True:
@@ -144,8 +138,8 @@ class CLI:
         return final_response
 
 
-async def run(messages: list[dict[str, Any]]) -> None:
-    client = LLMClient(api_key=API_KEY, base_url=BASE_URL)
+async def run(messages: list[dict[str, Any]], config: Config) -> None:
+    client = LLMClient(config=config)
     async for event in client.chat_completion(
         messages=messages,
         stream=True

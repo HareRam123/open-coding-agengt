@@ -2,22 +2,21 @@
 
 
 from __future__ import annotations
-from os import name
 from pathlib import Path
-from tools.registry import create_default_registry
+from agent.session import Session
 from typing import AsyncGenerator
 
-from LLMClient import LLMClient
 from agent.event import AgentEvent, AgentEventType
 from response import StreamEventType, ToolCall, ToolResultMessage
-from context.manager import ContextManager
 
 
 class Agent:
-    def __init__(self, api_key: str, base_url: str):
-        self.client = LLMClient(api_key=api_key, base_url=base_url)
-        self.context_manager = ContextManager()  # Initialize context manager if needed
-        self.tool_registry = create_default_registry()  
+    def __init__(self, config):
+        self.config = config
+        self.session = Session(config=config)
+        self.client = self.session.client
+        self.context_manager = self.session.context_manager
+        self.tool_registry = self.session.tool_registry
         
 
     async def run(self, prompt: str):
@@ -70,7 +69,7 @@ class Agent:
             
             result = await self.tool_registry.invoke(name=tool_call.name or "",
                                       params=tool_call.arguments,
-                                      cwd=Path.cwd(),
+                                      cwd=self.config.cwd,
                                       )
             yield AgentEvent.tool_call_complete(
                 call_id=tool_call.call_id,

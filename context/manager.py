@@ -1,4 +1,5 @@
 from typing import Any
+from config.config import Config
 from prompts.system import get_system_prompt
 from dataclasses import dataclass, field
 
@@ -29,9 +30,9 @@ class MessageItem:
 
 
 class ContextManager:
-    def __init__(self):
+    def __init__(self, config: Config | None = None):
         self._system_prompt = get_system_prompt()
-        self._model_name = "gpt-4"
+        self._model_name = config.model_name if config else "gpt-4"
         self._messages: list[MessageItem] = []
 
     def add_user_message(self,

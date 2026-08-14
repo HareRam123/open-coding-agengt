@@ -9,6 +9,6 @@ user_instructions = "When uncertain, show assumptions before action."
 debug = false
 
 [model]
-name = "mistralai/devstral-small:free"
+name = "openai/gpt-4o-mini"
 temperature = 0.4
 context_window = 128000

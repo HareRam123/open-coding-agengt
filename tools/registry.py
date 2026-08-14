@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 
+from config.config import Config
 from tools.base import Tool, ToolInvocation, ToolResult
 import logging
 
@@ -91,7 +92,7 @@ class ToolRegistry:
             )
         return result
 
-def create_default_registry() -> ToolRegistry:
+def create_default_registry(config: Config | None = None) -> ToolRegistry:
     registry = ToolRegistry()
 
     for tool_class in get_all_builtin_tools():
