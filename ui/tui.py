@@ -2,6 +2,8 @@ from pathlib import Path
 import re
 from typing import Any
 
+from config.config import Config
+
 from rich import box
 from rich.console import Console, Group
 from rich.panel import Panel
@@ -56,11 +58,22 @@ def get_console() -> Console:
 
 
 class TUI:
-    def __init__(self,console: Console):
+    def __init__(
+        self,
+        console: Console,
+        config: Config | None = None,
+        model_name: str = "gpt-4",
+        max_block_tokens: int = 10_000,
+    ):
         self.console = console
+        self.config = config
+        self.model_name = config.model_name if config else model_name
+        self._max_block_tokens = (
+            config.max_tool_output_tokens if config else max_block_tokens
+        )
         self._assistant_stream_open = False
         self._tool_args_by_call_id: dict[str, dict[str, Any]] = {}
-        self.cwd = os.getcwd()
+        self.cwd = str(config.cwd) if config else os.getcwd()
 
     def begin_assistant(self) -> None:
         self.console.print()
@@ -238,7 +251,7 @@ class TUI:
                 blocks.append(Text(error, style="error"))
 
             output_display = truncate_text(
-                output, self.config.model_name, self._max_block_tokens
+                output, self.model_name, self._max_block_tokens
             )
             if output_display.strip():
                 blocks.append(
@@ -269,6 +282,20 @@ class TUI:
         )
         self.console.print()
         self.console.print(panel)
+
+    
+    def print_welcome(self, title: str, lines: list[str]) -> None:
+        body = "\n".join(lines)
+        self.console.print(
+            Panel(
+                Text(body, style="code"),
+                title=Text(title, style="highlight"),
+                title_align="left",
+                border_style="border",
+                box=box.ROUNDED,
+                padding=(1, 2),
+            )
+        )
 
     def _extract_read_file_code(self, text: str) -> tuple[int, str] | None:
         body = text

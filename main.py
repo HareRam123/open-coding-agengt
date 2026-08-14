@@ -1,6 +1,7 @@
 import asyncio
 from logging import config
 import os
+from pathlib import Path
 import sys
 from typing import Any
 import click
@@ -10,6 +11,8 @@ from dotenv import load_dotenv
 from LLMClient import LLMClient
 from agent.agent import Agent
 from agent.event import AgentEventType
+from config.config import Config
+from config.loader import load_config
 from ui.tui import TUI, get_console
 
 
@@ -22,16 +25,58 @@ console = get_console()
 
 class CLI:
     
-    def __init__(self, api_key: str, base_url: str):
+    def __init__(self, config: Config):
         self.agent: Agent | None = None
-        self.api_key = api_key
-        self.base_url = base_url
-        self.tui = TUI(console)
+        self.config = config
+        self.tui = TUI(
+            console,
+            config=self.config,
+        )
 
     async def run_single(self, messages: str) -> str | None:
-        async with Agent(api_key=self.api_key, base_url=self.base_url) as agent:
+        async with Agent(
+            api_key=self.config.api_key or "",
+            base_url=self.config.base_url or BASE_URL,
+        ) as agent:
             self.agent = agent
             return await self._process_message(messages)
+
+    async def run_interactive(self) -> str | None:
+        self.tui.print_welcome(
+            "AI Agent",
+            lines=[
+                f"model: {self.config.model_name}",
+                f"cwd: {self.config.cwd}",
+                "commands: /help /config /approval /model /exit",
+            ],
+        )
+
+        async with Agent(
+            api_key=self.config.api_key or "",
+            base_url=self.config.base_url or BASE_URL,
+        ) as agent:
+            self.agent = agent
+
+            while True:
+                try:
+                    user_input = console.input("\n[user]>[/user] ").strip()
+                    if not user_input:
+                        continue
+
+                    if user_input.startswith("/"):
+                        should_continue = await self._handle_command(user_input)
+                        if not should_continue:
+                            break
+                        continue
+
+                    await self._process_message(user_input)
+                except KeyboardInterrupt:
+                    console.print("\n[dim]Use /exit to quit[/dim]")
+                except EOFError:
+                    break
+
+        console.print("\n[dim]Goodbye![/dim]")
+
 
     def _get_tool_kind(self, tool_name: str) -> str | None:
         tool_kind = None
@@ -108,15 +153,46 @@ async def run(messages: list[dict[str, Any]]) -> None:
         pass
 
 
+
 @click.command()
 @click.argument("prompt", required=False)
-def main(prompt: str) -> None:
-    cli = CLI(api_key=API_KEY, base_url=BASE_URL)
+@click.option(
+    "--cwd",
+    "-c",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    help="Current working directory",
+)
+def main(
+    prompt: str | None,
+    cwd: Path | None,
+):
+    try:
+        config = load_config(cwd=cwd)
+    except Exception as e:
+        console.print(f"[error]Configuration Error: {e}[/error]")
+        sys.exit(1)
+
+    
+    errors = config.validate()
+
+    if errors:
+        for error in errors:
+            console.print(f"[error]{error}[/error]")
+
+        sys.exit(1)
+
+    cli = CLI(config)
+    print(f"Loaded model: {config.model_name}")
+
+    
+        
     print("Starting the agent...", prompt)
     if prompt:
         result = asyncio.run(cli.run_single(prompt))
         if result is None:
             sys.exit(1)
+    else:
+        asyncio.run(cli.run_interactive())
 
 
 # async def main() -> None:

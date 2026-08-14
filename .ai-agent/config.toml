@@ -1,0 +1,14 @@
+# Sample project-local config for open-coding-agent
+
+cwd = "."
+max_turns = 30
+max_tool_output_tokens = 8000
+
+developer_instructions = "Keep answers concise and prioritize safe file operations."
+user_instructions = "When uncertain, show assumptions before action."
+debug = false
+
+[model]
+name = "mistralai/devstral-small:free"
+temperature = 0.4
+context_window = 128000
