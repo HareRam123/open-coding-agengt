@@ -1,4 +1,5 @@
 import asyncio
+import json
 from logging import config
 import os
 from pathlib import Path
@@ -44,7 +45,7 @@ class CLI:
             lines=[
                 f"model: {self.config.model_name}",
                 f"cwd: {self.config.cwd}",
-                "commands: /help /config /approval /model /exit",
+                "commands: /help /config /messages /approval /model /exit",
             ],
         )
 
@@ -84,6 +85,7 @@ class CLI:
                 lines=[
                     "/help - show this message",
                     "/config - show loaded config summary",
+                    "/messages - show exact messages sent to the LLM so far",
                     "/exit - quit the interactive session",
                 ],
             )
@@ -98,6 +100,18 @@ class CLI:
                     f"max_turns: {self.config.max_turns}",
                     f"max_tool_output_tokens: {self.config.max_tool_output_tokens}",
                 ],
+            )
+            return True
+
+        if normalized == "/messages":
+            if not self.agent:
+                self.tui.console.print("[error]Agent is not initialized[/error]")
+                return True
+
+            messages = self.agent.session.context_manager.get_messages()
+            self.tui.print_welcome(
+                "LLM Messages",
+                lines=[json.dumps(messages, indent=2, ensure_ascii=False)],
             )
             return True
 

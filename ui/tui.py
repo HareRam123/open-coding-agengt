@@ -92,6 +92,7 @@ class TUI:
     def _ordered_args(self, tool_name: str, args: dict[str, Any]) -> list[tuple]:
         _PREFERRED_ORDER = {
             "read_file": ["path", "offset", "limit"],
+            "write_file": ["path", "create_directories", "content"],
         }
 
         preferred = _PREFERRED_ORDER.get(tool_name, [])
@@ -246,6 +247,23 @@ class TUI:
                     )
                 )
 
+        elif name in {"write_file", "edit"} and success and diff:
+            output_line = output.strip() if output.strip() else "Completed"
+            blocks.append(Text(output_line, style="muted"))
+            diff_text = diff
+            diff_display = truncate_text(
+                diff_text,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    diff_display,
+                    "diff",
+                    theme="monokai",
+                    word_wrap=True,
+                )
+            )
         else:
             if error and not success:
                 blocks.append(Text(error, style="error"))
