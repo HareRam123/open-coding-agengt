@@ -9,7 +9,7 @@ from utils.text import count_tokens
 @dataclass
 class MessageItem:
     role: str
-    content: str
+    content: str | None
     tool_call_id: str | None = None
     tool_calls: list[dict[str, Any]] = field(default_factory=list)
     token_count: int | None = None
@@ -22,8 +22,8 @@ class MessageItem:
 
         if self.tool_calls:
             result["tool_calls"] = self.tool_calls
-        
-        if self.content:
+
+        if self.content is not None:
             result["content"] = self.content
 
         return result
@@ -47,11 +47,12 @@ class ContextManager:
 
     def add_assistant_message(self,
                               content: str | None,
+                              tool_calls: list[dict[str, Any]] | None = None,
                               ) -> None:
-        safe_content = content or ""
         item = MessageItem(role="assistant", 
-                           content=safe_content, 
-                           token_count=count_tokens(safe_content, model=self._model_name)
+                           content=content if content else None,
+                           tool_calls=tool_calls or [],
+                           token_count=count_tokens(content or "", model=self._model_name)
                            )
         self._messages.append(item)
 

@@ -12,7 +12,7 @@ from response import StreamEventType, ToolCall, ToolResultMessage
 
 class Agent:
     def __init__(self, config):
-        self.session = Session(config=config)
+        self.session :Session | None = Session(config=config)
         self.config = self.session.config
         
 
@@ -88,10 +88,15 @@ class Agent:
     async def __aenter__(self) -> Agent:
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback) -> None:
-        if self.session.client:
+    async def __aexit__(
+        self,
+        exc_type,
+        exc_val,
+        exc_tb,
+    ) -> None:
+        if self.session and self.session.client :
             await self.session.client.close()
-            self.session.client = None
-            
+
+            self.session = None
 
 

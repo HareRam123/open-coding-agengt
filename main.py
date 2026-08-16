@@ -72,6 +72,39 @@ class CLI:
         console.print("\n[dim]Goodbye![/dim]")
 
 
+    async def _handle_command(self, command: str) -> bool:
+        normalized = command.strip().lower()
+
+        if normalized in {"/exit", "/quit"}:
+            return False
+
+        if normalized == "/help":
+            self.tui.print_welcome(
+                "Commands",
+                lines=[
+                    "/help - show this message",
+                    "/config - show loaded config summary",
+                    "/exit - quit the interactive session",
+                ],
+            )
+            return True
+
+        if normalized == "/config":
+            self.tui.print_welcome(
+                "Loaded Config",
+                lines=[
+                    f"model: {self.config.model_name}",
+                    f"cwd: {self.config.cwd}",
+                    f"max_turns: {self.config.max_turns}",
+                    f"max_tool_output_tokens: {self.config.max_tool_output_tokens}",
+                ],
+            )
+            return True
+
+        self.tui.console.print(f"[warning]Unknown command: {command}[/warning]")
+        return True
+
+
     def _get_tool_kind(self, tool_name: str) -> str | None:
         tool_kind = None
         if not self.agent:

@@ -66,7 +66,6 @@ class ToolCall:
     arguments: str = ""
 
 
-
 @dataclass
 class StreamEvent:
     type: StreamEventType 

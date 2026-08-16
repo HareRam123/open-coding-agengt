@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import uuid
 
 from LLMClient import LLMClient
 from config.config import Config
@@ -13,6 +14,11 @@ class Session:
         self.client = LLMClient(config=config)
         self.tool_registry = create_default_registry(config)
         self.context_manager = ContextManager(config=config)
+        self.session_id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
+        self.turn_count = 0
 
 
     def increment_turn(self) -> int:
