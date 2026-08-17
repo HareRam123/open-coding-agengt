@@ -1,14 +1,17 @@
 from tools.builtin.read_file import ReadFileTool
 from tools.builtin.write_file import WriteFileTool
 from tools.builtin.edit_file import EditTool
+from tools.list_dir import ListDirTool
 from tools.builtin.shell import ShellTool
 
 
-__all__ = ["ReadFileTool", "WriteFileTool", "EditTool"]
+
+__all__ = ["ReadFileTool", "WriteFileTool", "EditTool", "ListDirTool", "ShellTool"]
 
 def get_all_builtin_tools() -> list[type]:
     return [ReadFileTool,
             WriteFileTool,
             EditTool,
-            ShellTool,]
+            ShellTool,
+            ListDirTool]
             
