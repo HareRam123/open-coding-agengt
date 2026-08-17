@@ -96,6 +96,9 @@ def create_default_registry(config: Config | None = None) -> ToolRegistry:
     registry = ToolRegistry()
 
     for tool_class in get_all_builtin_tools():
-        registry.register(tool_class())
+        try:
+            registry.register(tool_class(config=config))
+        except TypeError:
+            registry.register(tool_class())
 
     return registry

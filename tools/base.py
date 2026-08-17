@@ -110,8 +110,8 @@ class Tool(abc.ABC):
     description:str = "This is a base tool. It should be subclassed to create specific tools."
     kind:ToolKind = ToolKind.READ
     
-    def __init__(self):
-        pass
+    def __init__(self, config: Any | None = None):
+        self.config = config
 
     @property
     def schema(self) -> dict[str, Any] | type[BaseModel]:

@@ -94,6 +94,7 @@ class TUI:
             "read_file": ["path", "offset", "limit"],
             "write_file": ["path", "create_directories", "content"],
             "edit": ["path", "replace_all", "old_string", "new_string"],
+            "shell": ["command", "timeout", "cwd"],
         }
 
         preferred = _PREFERRED_ORDER.get(tool_name, [])
@@ -261,6 +262,27 @@ class TUI:
                 Syntax(
                     diff_display,
                     "diff",
+                    theme="monokai",
+                    word_wrap=True,
+                )
+            )
+        elif name == "shell" and success:
+            command = args.get("command")
+            if isinstance(command, str) and command.strip():
+                blocks.append(Text(f"$ {command.strip()}", style="muted"))
+
+            if exit_code is not None:
+                blocks.append(Text(f"exit_code={exit_code}", style="muted"))
+
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    "text",
                     theme="monokai",
                     word_wrap=True,
                 )
