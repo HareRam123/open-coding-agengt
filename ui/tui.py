@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import re
 from typing import Any
 
@@ -98,6 +99,7 @@ class TUI:
             "list_dir": ["path", "include_hidden"],
             "grep": ["path", "case_insensitive", "pattern"],
             "glob": ["path", "pattern"],
+            "todos": ["id", "action", "content"],
             
              
         }
@@ -128,7 +130,9 @@ class TUI:
                     byte_count = len(value.encode("utf-8", errors="replace"))
                     value = f"<{line_count} lines • {byte_count} bytes>"
 
-            if isinstance(value, bool):
+            if isinstance(value, (dict, list, tuple, set)):
+                value = json.dumps(value, ensure_ascii=False, default=str)
+            elif not isinstance(value, str):
                 value = str(value)
 
             table.add_row(key, value)
@@ -384,6 +388,49 @@ class TUI:
                     word_wrap=True,
                 )
             )
+        elif name == "web_fetch" and success:
+            status_code = metadata.get("status_code")
+            content_length = metadata.get("content_length")
+            url = args.get("url")
+            summary = []
+            if isinstance(status_code, int):
+                summary.append(str(status_code))
+            if isinstance(content_length, int):
+                summary.append(f"{content_length} bytes")
+            if isinstance(url, str):
+                summary.append(url)
+
+            if summary:
+                blocks.append(Text(" • ".join(summary), style="muted"))
+
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    "text",
+                    theme="monokai",
+                    word_wrap=True,
+                )
+            )
+        elif name == "todos" and success:
+            output_display = truncate_text(
+                output,
+                self.config.model_name,
+                self._max_block_tokens,
+            )
+            blocks.append(
+                Syntax(
+                    output_display,
+                    "text",
+                    theme="monokai",
+                    word_wrap=True,
+                )
+            )
+
         else:
             if error and not success:
                 blocks.append(Text(error, style="error"))
