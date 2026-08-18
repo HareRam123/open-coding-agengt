@@ -4,10 +4,11 @@ from tools.builtin.edit_file import EditTool
 from tools.grep import GrepTool
 from tools.list_dir import ListDirTool
 from tools.builtin.shell import ShellTool
+from tools.builtin.glob import GlobTool
 
 
 
-__all__ = ["ReadFileTool", "WriteFileTool", "EditTool", "ListDirTool", "ShellTool", "GrepTool"]
+__all__ = ["ReadFileTool", "WriteFileTool", "EditTool", "ListDirTool", "ShellTool", "GrepTool", "GlobTool"]
 
 def get_all_builtin_tools() -> list[type]:
     return [ReadFileTool,
@@ -15,5 +16,6 @@ def get_all_builtin_tools() -> list[type]:
             EditTool,
             ShellTool,
             ListDirTool,
-            GrepTool]  # Add other built-in tools here as needed
+            GrepTool,
+            GlobTool,]  # Add other built-in tools here as needed
             
