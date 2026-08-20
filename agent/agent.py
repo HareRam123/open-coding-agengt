@@ -61,7 +61,6 @@ class Agent:
                     usage = event.usage
 
 
-        
             self.session.context_manager.add_assistant_message(
                 response_text or None,
                 (

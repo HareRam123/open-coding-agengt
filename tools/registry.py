@@ -7,7 +7,7 @@ from config.config import Config
 from tools.base import Tool, ToolInvocation, ToolResult
 import logging
 
-from tools.builtin import ReadFileTool, get_all_builtin_tools
+from tools.builtin import get_all_builtin_tools
 
 
 logger = logging.getLogger(__name__)

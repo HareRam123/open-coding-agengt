@@ -6,6 +6,7 @@ from typing import Any
 from config.config import Config
 from prompts.system import get_system_prompt
 
+from tools.base import Tool
 from utils.text import count_tokens
 
 
@@ -30,8 +31,8 @@ class MessageItem:
 
 
 class ContextManager:
-    def __init__(self, config: Config | None = None):
-        self._system_prompt = get_system_prompt()
+    def __init__(self, config: Config | None = None, user_memory: str | None = None, tools: list[Tool] | None = None):
+        self._system_prompt = get_system_prompt(config, user_memory=user_memory, tools=tools)
         self._model_name = config.model_name if config else "gpt-4"
         self._messages: list[MessageItem] = []
 

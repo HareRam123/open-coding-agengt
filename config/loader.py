@@ -22,6 +22,7 @@ def get_data_dir() -> Path:
     return Path(user_data_dir("ai-agent"))
 
 
+
 def get_system_config_path() -> Path:
     return get_config_dir() / CONFIG_FILE_NAME
 
