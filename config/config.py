@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +15,8 @@ class Config(BaseModel):
     cwd: Path = Field(default_factory=Path.cwd)
     max_turns: int = 100
     max_tool_output_tokens: int = 10_000
+
+    allowed_tools: list[str] | None = Field(default=None, description="List of allowed tools for the agent. If None, all tools are allowed.")
 
     developer_instructions: str | None = None
     user_instructions: str | None = None
@@ -56,3 +59,6 @@ class Config(BaseModel):
             errors.append(f"Working directory does not exist: {self.cwd}")
 
         return errors
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.model_dump(mode="json")
