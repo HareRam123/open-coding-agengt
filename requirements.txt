@@ -5,3 +5,4 @@ rich
 tiktoken
 platformdirs>=4.0.0
 ddgs
+streamlit
