@@ -52,7 +52,10 @@ class Config(BaseModel):
     max_turns: int = 100
     max_tool_output_tokens: int = 10_000
 
-    #mcp_servers: dict[str, MCPServerConfig] = Field(default_factory=dict, description="MCP server configurations")
+    mcp_servers: dict[str, MCPServerConfig] = Field(
+        default_factory=dict,
+        description="MCP server configurations",
+    )
 
     allowed_tools: list[str] | None = Field(default=None, description="List of allowed tools for the agent. If None, all tools are allowed.")
 

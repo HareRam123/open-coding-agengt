@@ -16,8 +16,8 @@ context_window = 128000
 
 [mcp_servers.filesystem]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem", "/Users/rivaanranawat/Desktop/ai-agent", "/tmp"]
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/Users/ram/Documents/Python_Projects/open-coding-agent", "/tmp"]
 
 [mcp_servers.filesystem2]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem222222222222", "/Users/rivaanranawat/Desktop/ai-agent", "/tmp"]
+args = ["-y", "@modelcontextprotocol/server-filesystem222222222222", "/Users/ram/Documents/Python_Projects/open-coding-agent", "/tmp"]

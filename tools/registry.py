@@ -17,6 +17,7 @@ class ToolRegistry:
     def __init__(self, config: Config ):
         self.config = config
         self._tools: dict[str, Tool] = {}
+        self._mcp_tools: dict[str, Tool] = {}
 
     def register(self, tool: Tool) -> None:
             if tool.name in self._tools:
@@ -25,16 +26,21 @@ class ToolRegistry:
             self._tools[tool.name] = tool
             logger.debug(f"Registered tool: {tool.name}")
 
+    def register_mcp_tool(self, tool: Tool) -> None:
+        self._mcp_tools[tool.name] = tool
+        logger.debug(f"Registered MCP tool: {tool.name}")
+
     def unregister(self, name: str) -> bool:
         if name in self._tools:
             del self._tools[name]
             return True
 
         return False
-
     def get(self, name: str) -> Tool | None:
         if name in self._tools:
             return self._tools[name]
+        elif name in self._mcp_tools:
+            return self._mcp_tools[name]
 
         return None
 
@@ -44,11 +50,15 @@ class ToolRegistry:
         for tool in self._tools.values():
             tools.append(tool)
 
-        if self.config.allowed_tools is not None:
-            allowed_tools_set = set(self.config.allowed_tools)
-            tools = [tool for tool in tools if tool.name in allowed_tools_set]
+        for mcp_tool in self._mcp_tools.values():
+            tools.append(mcp_tool)
+
+        if self.config.allowed_tools:
+            allowed_set = set(self.config.allowed_tools)
+            tools = [t for t in tools if t.name in allowed_set]
 
         return tools
+
 
 
     def get_schemas(self) -> list[dict[str, Any]]:
