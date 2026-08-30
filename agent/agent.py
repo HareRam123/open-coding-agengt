@@ -1,6 +1,4 @@
 
-
-
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -100,6 +98,8 @@ class Agent:
                 if usage:
                     self.session.context_manager.set_latest_usage(usage)
                     self.session.context_manager.add_usage(usage)
+
+                self.session.context_manager.prune_tool_outputs()
                 return
 
             for tool_call in tool_calls:
@@ -132,6 +132,8 @@ class Agent:
             if usage:
                 self.session.context_manager.set_latest_usage(usage)
                 self.session.context_manager.add_usage(usage)
+                
+            self.session.context_manager.prune_tool_outputs()
 
         yield AgentEvent.agent_error(f"Maximum turns ({max_turns}) reached")
 
