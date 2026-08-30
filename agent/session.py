@@ -7,6 +7,7 @@ from rich import json
 from LLMClient import LLMClient
 from config.config import Config
 from config.loader import get_data_dir
+from context.compaction import ChatCompactor
 from context.manager import ContextManager
 from tools.mcp.mcp_manager import MCPManager
 from tools.registry import create_default_registry
@@ -21,6 +22,7 @@ class Session:
 
         self.discovery_manager = ToolDiscoveryManager(config=config, registry=self.tool_registry)
         self.context_manager: ContextManager | None = None
+        self.chat_compactor = ChatCompactor(self.client)
 
         self.mcp_manager = MCPManager(config)  # Assuming you have a function to create the MCP manager
 

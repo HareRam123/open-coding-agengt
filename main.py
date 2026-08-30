@@ -45,7 +45,7 @@ class CLI:
             lines=[
                 f"model: {self.config.model_name}",
                 f"cwd: {self.config.cwd}",
-                "commands: /help /config /messages /approval /model /exit",
+                "commands: /help /config /messages /compact /approval /model /exit",
             ],
         )
 
@@ -86,6 +86,7 @@ class CLI:
                     "/help - show this message",
                     "/config - show loaded config summary",
                     "/messages - show exact messages sent to the LLM so far",
+                    "/compact - summarize current conversation and replace stored context",
                     "/exit - quit the interactive session",
                 ],
             )
@@ -113,6 +114,28 @@ class CLI:
                 "LLM Messages",
                 lines=[json.dumps(messages, indent=2, ensure_ascii=False)],
             )
+            return True
+
+        if normalized == "/compact":
+            if not self.agent or not self.agent.session.context_manager:
+                self.tui.console.print("[error]Agent is not initialized[/error]")
+                return True
+
+            self.tui.console.print("[dim]Compacting conversation context...[/dim]")
+            summary, usage = await self.agent.session.chat_compactor.compress(
+                self.agent.session.context_manager
+            )
+
+            if not summary:
+                self.tui.console.print("[warning]Not enough conversation history to compact[/warning]")
+                return True
+
+            self.agent.session.context_manager.replace_with_summary(summary)
+            if usage:
+                self.agent.session.context_manager.set_latest_usage(usage)
+                self.agent.session.context_manager.add_usage(usage)
+
+            self.tui.console.print("[success]Context compacted[/success]")
             return True
 
         self.tui.console.print(f"[warning]Unknown command: {command}[/warning]")

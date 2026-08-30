@@ -5,7 +5,7 @@ import platform
 from config.config import Config
 from tools.base import Tool
 
-__all__ = ["get_system_prompt"]
+__all__ = ["get_system_prompt", "get_compression_prompt"]
 
 
 
@@ -41,6 +41,19 @@ def get_system_prompt(
     return "\n\n".join(parts)
 
     return " ".join(parts)
+
+
+def get_compression_prompt() -> str:
+    return """You are compressing a conversation history for an AI coding agent.
+
+Create a concise but complete summary that preserves:
+- the user's current goal and latest request
+- files changed or inspected
+- important decisions, assumptions, and constraints
+- errors encountered and fixes already attempted
+- pending work needed to continue correctly
+
+Do not include generic filler. Write the summary so another agent can continue the work without rereading the full conversation."""
 
 
 def _get_memory_section(memory: str) -> str:
